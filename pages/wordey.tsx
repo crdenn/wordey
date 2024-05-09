@@ -44,6 +44,7 @@ function Wordey({ playableWords, guessableWords }: WordeyProps) {
                 const updatedGuesses = [...guesses];
                 updatedGuesses[currentRow][guesses[currentRow].join('').length - 1] = "";
                 setGuesses(updatedGuesses);
+                setInvalidWordVisible(false);
             } else if (/^[a-zA-Z]$/.test(event.key) && guesses[currentRow].join('').length < 5) {
                 const updatedGuesses = [...guesses];
                 updatedGuesses[currentRow][guesses[currentRow].join('').length] = event.key.toLowerCase();
@@ -51,8 +52,11 @@ function Wordey({ playableWords, guessableWords }: WordeyProps) {
             }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        // Ensure event listeners are added only in the client-side environment
+        if (typeof window !== 'undefined') {
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }
     }, [currentRow, guesses]);
 
     const isValidWord = (word) => {
@@ -61,7 +65,7 @@ function Wordey({ playableWords, guessableWords }: WordeyProps) {
 
     const submitGuess = () => {
         const currentGuess = guesses[currentRow].join('');
-        let lastAnimationDelay = currentGuess.length * 100; // Calculate the delay for the last animation
+        let lastAnimationDelay = currentGuess.length * 110; // Calculate the delay for the last animation
     
         // Update styles with a delay, each cell gets updated sequentially.
         currentGuess.split('').forEach((char, idx) => {
@@ -86,27 +90,19 @@ function Wordey({ playableWords, guessableWords }: WordeyProps) {
             }
         }, lastAnimationDelay);
     };
-    
-    
-    
-    
 
     function getTileStyle(char, idx, currentWord, guess) {
-        // Check if the character is in the correct position
         if (char === currentWord[idx]) {
             return "bg-green-600 rounded-none"; // Correct position
         } else if (currentWord.includes(char)) {
-            // Calculate occurrences of the character in the word up to the current index
             const letterCountInWord = currentWord.split('').filter((c, i) => c === char && i <= idx).length;
             const letterCountInGuess = guess.split('').slice(0, idx + 1).filter(c => c === char).length;
-            // Only mark as yellow if there are fewer or equal correct letters in the guess than in the word at that position
             if (letterCountInGuess <= letterCountInWord) {
                 return "bg-yellow-500 rounded-none"; // Correct letter, wrong position
             }
         }
         return "bg-zinc-700 rounded-none"; // Incorrect letter
     }
-    
 
     return (
         <div className="max-w-xs mx-auto mt-10 p-4 rounded-lg h-screen w-full md:w-auto md:h-auto">
@@ -126,7 +122,7 @@ function Wordey({ playableWords, guessableWords }: WordeyProps) {
                 ))}
             </div>
             {invalidWordVisible && (
-                <p className="text-center text-lg mt-4 text-red-500 animate-fade-out">Invalid Word</p>
+                <p className="text-center text-lg mt-4 text-red-500">Invalid Word</p>
             )}
             <p className="text-center text-lg mt-4 text-gray-600">{gameStatus}</p>
             {isGameOver && (
