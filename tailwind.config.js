@@ -20,7 +20,7 @@ module.exports = {
         }
       },
       animation: {
-        'fade-out': 'fadeOut 2.1s ease-out',
+        'fade-out': 'fadeOut 3s ease-out',
         shake: 'shake 0.82s cubic-bezier(.36,.07,.19,.97) both',
         flip: 'flip 0.6s ease-in-out'
       }
